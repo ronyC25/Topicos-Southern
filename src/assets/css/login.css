@@ -1,0 +1,37 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #1a2a45 0%, #2c4a7c 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-caja {
+    background: #fff;
+    padding: 40px 36px;
+    border-radius: 12px;
+    box-shadow: 0 12px 40px rgba(0,0,0,.3);
+    width: 100%;
+    max-width: 380px;
+}
+.login-caja h1 { color: #1a2a45; text-align: center; font-size: 30px; }
+.subtitulo { text-align: center; color: #778; font-size: 13px; margin: 6px 0 24px; }
+label { display: block; font-size: 13px; color: #445; margin: 14px 0 5px; font-weight: 600; }
+input {
+    width: 100%; padding: 11px 12px;
+    border: 1px solid #ccd; border-radius: 7px;
+    font-size: 14px;
+}
+input:focus { outline: none; border-color: #2c4a7c; }
+button {
+    width: 100%; margin-top: 22px; padding: 12px;
+    background: #2c4a7c; color: #fff;
+    border: none; border-radius: 7px;
+    font-size: 15px; font-weight: 600; cursor: pointer;
+}
+button:hover { background: #1a2a45; }
+.alerta { padding: 10px 12px; border-radius: 7px; font-size: 13px; margin-bottom: 8px; }
+.alerta-error { background: #fdeaea; color: #a33; border: 1px solid #f5c6c6; }
+.alerta-info  { background: #eaf3fd; color: #369; border: 1px solid #c6ddf5; }
+.pie { text-align: center; color: #aab; font-size: 11px; margin-top: 22px; }

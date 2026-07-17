@@ -1,0 +1,43 @@
+services:
+  web:
+    build: .
+    container_name: fleetcore_web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+    environment:
+      DB_HOST: db
+      DB_NAME: db_dispatch          # ← cambiado
+      DB_USER: spcc_app
+      DB_PASS: AppSpcc_2026*
+      MODO_DESARROLLO: "true"
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: fleetcore_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: db_dispatch   # ← cambiado
+      MYSQL_USER: spcc_app
+      MYSQL_PASSWORD: AppSpcc_2026*
+    volumes:                        # ← sin "ports": tu XAMPP ya usa 3306
+      - ./sql:/docker-entrypoint-initdb.d
+      - datos_mysql:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: fleetcore_pma
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root
+    depends_on:
+      - db
+
+volumes:
+  datos_mysql:
