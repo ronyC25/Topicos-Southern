@@ -9,8 +9,8 @@
 
 $host       = getenv('DB_HOST') ?: 'localhost';
 $bd         = getenv('DB_NAME') ?: 'db_dispatch';
-$usuario    = getenv('DB_USER') ?: 'spcc_app';
-$contrasena = getenv('DB_PASS') ?: 'AppSpcc_2026*';
+$usuario    = getenv('DB_USER') ?: 'root';
+$contrasena = getenv('DB_PASS') ?: '';
 
 try {
     $pdo = new PDO(

@@ -1,37 +1,671 @@
-* { margin: 0; padding: 0; box-sizing: border-box; }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
     font-family: 'Segoe UI', Arial, sans-serif;
-    background: linear-gradient(135deg, #1a2a45 0%, #2c4a7c 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: linear-gradient(135deg, #0a1220 0%, #14213d 30%, #1a2a45 60%, #2c4a7c 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 18s ease infinite;
+    overflow: hidden;
+    position: relative;
 }
-.login-caja {
-    background: #fff;
-    padding: 40px 36px;
-    border-radius: 12px;
-    box-shadow: 0 12px 40px rgba(0,0,0,.3);
+
+.campo-icono-bg svg {
     width: 100%;
-    max-width: 380px;
+    height: 100%;
 }
-.login-caja h1 { color: #1a2a45; text-align: center; font-size: 30px; }
-.subtitulo { text-align: center; color: #778; font-size: 13px; margin: 6px 0 24px; }
-label { display: block; font-size: 13px; color: #445; margin: 14px 0 5px; font-weight: 600; }
-input {
-    width: 100%; padding: 11px 12px;
-    border: 1px solid #ccd; border-radius: 7px;
+
+@keyframes gradientShift {
+    0% {
+        background-position: 0% 50%;
+    }
+
+    25% {
+        background-position: 100% 0%;
+    }
+
+    50% {
+        background-position: 100% 100%;
+    }
+
+    75% {
+        background-position: 0% 100%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes floatShape {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+    }
+
+    25% {
+        transform: translate(80px, -50px) scale(1.08);
+    }
+
+    50% {
+        transform: translate(-40px, 70px) scale(.93);
+    }
+
+    75% {
+        transform: translate(50px, 30px) scale(1.04);
+    }
+}
+
+/* ---- Floating shapes ---- */
+.fondo-shapes {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.shape {
+    position: absolute;
+    border-radius: 50%;
+    animation: floatShape 20s ease-in-out infinite;
+}
+
+.shape-1 {
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(122, 176, 255, .12), transparent 70%);
+    top: -20%;
+    left: -10%;
+    animation-duration: 25s;
+}
+
+.shape-2 {
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(167, 139, 250, .10), transparent 70%);
+    bottom: -20%;
+    right: -10%;
+    animation-duration: 28s;
+    animation-delay: -6s;
+}
+
+.shape-3 {
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(52, 211, 153, .08), transparent 70%);
+    top: 30%;
+    right: -5%;
+    animation-duration: 22s;
+    animation-delay: -12s;
+}
+
+.shape-4 {
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(251, 191, 36, .07), transparent 70%);
+    bottom: 15%;
+    left: -2%;
+    animation-duration: 26s;
+    animation-delay: -4s;
+}
+
+/* ---- Particles ---- */
+.particula {
+    position: absolute;
+    width: var(--s, 3px);
+    height: var(--s, 3px);
+    left: var(--x, 50%);
+    top: var(--y, 50%);
+    background: rgba(255, 255, 255, .35);
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(255, 255, 255, .15);
+    animation: particulaFlota var(--d, 15s) ease-in-out infinite;
+    animation-delay: calc(var(--d, 15s) * -0.5);
+}
+
+@keyframes particulaFlota {
+
+    0%,
+    100% {
+        transform: translate(0, 0) scale(1);
+        opacity: .35;
+    }
+
+    25% {
+        transform: translate(30px, -40px) scale(1.3);
+        opacity: .6;
+    }
+
+    50% {
+        transform: translate(-20px, 20px) scale(.8);
+        opacity: .2;
+    }
+
+    75% {
+        transform: translate(15px, 30px) scale(1.1);
+        opacity: .5;
+    }
+}
+
+/* ---- Grid overlay ---- */
+.rejilla {
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .015) 1px, transparent 1px);
+    background-size: 60px 60px;
+    animation: rejillaMov 30s linear infinite;
+}
+
+@keyframes rejillaMov {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    100% {
+        transform: translate(60px, 60px);
+    }
+}
+
+/* ---- Login container ---- */
+.login-contenedor {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
+    animation: contenedorEntrada .9s ease-out;
+}
+
+@keyframes contenedorEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(.96);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ---- Login box ---- */
+.login-caja {
+    background: rgba(255, 255, 255, .97);
+    backdrop-filter: blur(16px);
+    padding: 36px 36px 30px;
+    border-radius: 20px;
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, .45),
+        0 0 0 1px rgba(255, 255, 255, .06);
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    transition: box-shadow .5s, transform .5s;
+}
+
+.login-caja:hover {
+    box-shadow:
+        0 30px 90px rgba(0, 0, 0, .5),
+        0 0 0 1px rgba(255, 255, 255, .08);
+    transform: translateY(-3px);
+}
+
+/* Focus glow state (toggled by JS) */
+.login-caja.enfocado {
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, .45),
+        0 0 0 1px rgba(255, 255, 255, .08),
+        0 0 40px rgba(91, 141, 238, .08);
+    transform: translateY(-3px);
+}
+
+/* ---- Top accent bar ---- */
+.login-accent {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #2c4a7c, #5b8dee, #2c4a7c);
+    background-size: 200% 100%;
+    animation: accentBrillo 3s ease-in-out infinite;
+}
+
+@keyframes accentBrillo {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+/* ---- Logo icon ---- */
+.logo-icono {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.logo-icono svg {
+    width: 36px;
+    height: 36px;
+    animation: iconoAparece .7s ease-out both;
+    animation-delay: .1s;
+}
+
+@keyframes iconoAparece {
+    from {
+        opacity: 0;
+        transform: scale(.5) rotate(-20deg);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) rotate(0);
+    }
+}
+
+/* ---- Typography ---- */
+.login-caja h1 {
+    color: #1a2a45;
+    text-align: center;
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -.5px;
+    animation: textoAparece .6s ease-out both;
+    animation-delay: .15s;
+}
+
+.subtitulo {
+    text-align: center;
+    color: #889;
+    font-size: 12.5px;
+    margin: 4px 0 22px;
+    font-weight: 400;
+    animation: textoAparece .6s ease-out both;
+    animation-delay: .2s;
+}
+
+@keyframes textoAparece {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---- Alerts ---- */
+.alerta {
+    padding: 11px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    animation: alertaEntrada .45s ease-out;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.alerta::before {
+    content: '';
+    width: 4px;
+    align-self: stretch;
+    border-radius: 2px;
+    flex-shrink: 0;
+}
+
+.alerta-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+.alerta-error::before {
+    background: #dc2626;
+}
+
+.alerta-info {
+    background: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.alerta-info::before {
+    background: #3b82f6;
+}
+
+@keyframes alertaEntrada {
+    from {
+        opacity: 0;
+        transform: translateY(-14px) scale(.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ---- Campo (label above) ---- */
+.campo {
+    margin-bottom: 18px;
+    animation: textoAparece .6s ease-out both;
+}
+
+.campo:nth-of-type(1) {
+    animation-delay: .28s;
+}
+
+.campo:nth-of-type(2) {
+    animation-delay: .38s;
+}
+
+.campo label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #445;
+    margin-bottom: 6px;
+    letter-spacing: .2px;
+    transition: color .3s;
+}
+
+.campo-input:focus-within label {
+    color: #2c4a7c;
+}
+
+.campo-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.campo-icono-bg {
+    position: absolute;
+    left: 10px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background: #f0f3f9;
+    pointer-events: none;
+    z-index: 3;
+    transition: background .35s, transform .4s cubic-bezier(.34, 1.56, .64, 1), box-shadow .35s;
+}
+
+.campo-icono {
+    width: 20px;
+    height: 20px;
+    display: block;
+}
+
+.campo-input:focus-within .campo-icono-bg {
+    background: #e8eef8;
+    transform: scale(1.08);
+    box-shadow: 0 0 0 3px rgba(44, 74, 124, .1);
+}
+
+.campo input {
+    width: 100%;
+    padding: 12px 14px 12px 50px;
+    border: 1.5px solid #e0e4ec;
+    border-radius: 10px;
     font-size: 14px;
+    font-family: inherit;
+    color: #223;
+    background: #f8f9fc;
+    outline: none;
+    transition: border-color .3s, background .3s, box-shadow .3s;
 }
-input:focus { outline: none; border-color: #2c4a7c; }
-button {
-    width: 100%; margin-top: 22px; padding: 12px;
-    background: #2c4a7c; color: #fff;
-    border: none; border-radius: 7px;
-    font-size: 15px; font-weight: 600; cursor: pointer;
+
+.campo input:focus {
+    border-color: #2c4a7c;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(44, 74, 124, .1);
 }
-button:hover { background: #1a2a45; }
-.alerta { padding: 10px 12px; border-radius: 7px; font-size: 13px; margin-bottom: 8px; }
-.alerta-error { background: #fdeaea; color: #a33; border: 1px solid #f5c6c6; }
-.alerta-info  { background: #eaf3fd; color: #369; border: 1px solid #c6ddf5; }
-.pie { text-align: center; color: #aab; font-size: 11px; margin-top: 22px; }
+
+.campo input:hover:not(:focus) {
+    border-color: #c8ceda;
+    background: #f3f5f9;
+}
+
+.campo input::placeholder {
+    color: #b8c0cc;
+    font-size: 13px;
+    transition: color .3s, transform .3s, opacity .3s;
+}
+
+.campo input:focus::placeholder {
+    color: #c8d0dc;
+    transform: translateX(4px);
+    opacity: .6;
+}
+
+/* ---- Glow dot when typing ---- */
+.campo-input::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #2c4a7c;
+    opacity: 0;
+    transform: scale(0);
+    transition: opacity .3s, transform .3s;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.campo-input:focus-within::after {
+    opacity: 1;
+    transform: scale(1);
+    animation: pulsoDot .8s ease-in-out infinite;
+}
+
+@keyframes pulsoDot {
+
+    0%,
+    100% {
+        box-shadow: 0 0 0 0 rgba(44, 74, 124, .3);
+    }
+
+    50% {
+        box-shadow: 0 0 0 4px rgba(44, 74, 124, 0);
+    }
+}
+
+/* ---- Button ---- */
+.btn-onda {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    transform: scale(0);
+    pointer-events: none;
+}
+
+button[type="submit"] {
+    width: 100%;
+    margin-top: 6px;
+    padding: 13px;
+    background: linear-gradient(135deg, #2c4a7c, #1a2a45);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    letter-spacing: .3px;
+    transition: transform .25s, box-shadow .35s, background .4s;
+    animation: textoAparece .6s ease-out both;
+    animation-delay: .48s;
+}
+
+button[type="submit"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(44, 74, 124, .35);
+}
+
+button[type="submit"]:active {
+    transform: translateY(0) scale(.98);
+    box-shadow: 0 4px 12px rgba(44, 74, 124, .25);
+}
+
+/* Ready state — both fields filled */
+button[type="submit"].listo {
+    background: linear-gradient(135deg, #2c4a7c, #3d66a8);
+    box-shadow: 0 6px 24px rgba(44, 74, 124, .25);
+    animation: btnListo 2s ease-in-out infinite, textoAparece .6s ease-out both;
+    animation-delay: .48s, .48s;
+}
+
+@keyframes btnListo {
+
+    0%,
+    100% {
+        box-shadow: 0 6px 24px rgba(44, 74, 124, .25);
+    }
+
+    50% {
+        box-shadow: 0 6px 32px rgba(44, 74, 124, .45), 0 0 40px rgba(91, 141, 238, .1);
+    }
+}
+
+/* Shine sweep */
+button[type="submit"]::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 40%;
+    height: 200%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .08), transparent);
+    transform: rotate(25deg);
+    transition: left .7s ease;
+}
+
+button[type="submit"]:hover::after {
+    left: 120%;
+}
+
+/* Button arrow icon */
+.btn-icono {
+    display: none;
+    width: 18px;
+    height: 18px;
+    margin-left: 6px;
+    vertical-align: middle;
+    transition: transform .3s;
+}
+
+button[type="submit"]:hover .btn-icono {
+    transform: translateX(3px);
+}
+
+button:not(.cargando) .btn-icono {
+    display: inline-block;
+}
+
+/* Loading state */
+.btn-texto,
+.btn-spinner {
+    transition: opacity .25s;
+}
+
+.btn-spinner {
+    display: none;
+    width: 20px;
+    height: 20px;
+    border: 2.5px solid rgba(255, 255, 255, .3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    margin: 0 auto;
+}
+
+button.cargando .btn-texto {
+    display: none;
+}
+
+button.cargando .btn-spinner {
+    display: block;
+    animation: spin .7s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ---- Footer ---- */
+.pie {
+    text-align: center;
+    color: #b0b8c4;
+    font-size: 11px;
+    margin-top: 22px;
+    letter-spacing: .3px;
+    animation: textoAparece .6s ease-out both;
+    animation-delay: .58s;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 480px) {
+    .login-contenedor {
+        padding: 12px;
+    }
+
+    .login-caja {
+        padding: 28px 22px 24px;
+        border-radius: 16px;
+    }
+
+    .login-caja h1 {
+        font-size: 22px;
+    }
+
+    .particula {
+        display: none;
+    }
+
+    .shape-1 {
+        width: 350px;
+        height: 350px;
+    }
+
+    .shape-2 {
+        width: 280px;
+        height: 280px;
+    }
+
+    .shape-3 {
+        width: 180px;
+        height: 180px;
+    }
+
+    .shape-4 {
+        width: 120px;
+        height: 120px;
+    }
+}

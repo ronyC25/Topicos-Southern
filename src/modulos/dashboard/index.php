@@ -71,31 +71,44 @@ $titulo_pagina = 'Dashboard';
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-    <h1 class="titulo-modulo" style="margin-bottom: 0;">Dashboard</h1>
-    <span style="font-size:12px; color:#778;">Actualizado: <?= e(date('d/m/Y H:i')) ?></span>
+<div class="dash-header">
+    <div>
+        <h1 class="titulo-modulo" style="margin-bottom: 0;">Dashboard</h1>
+        <p class="dash-sub">Panel de control — SPCC</p>
+    </div>
+    <div class="dash-hora" id="dash-reloj"><?= e(date('d/m/Y H:i')) ?></div>
 </div>
 
-<h2 style="font-size:14px; margin-bottom:10px; color:#667; text-transform:uppercase; letter-spacing:.4px;">
-    Estado de la flota (<?= $total_vehiculos ?> vehículos)
-</h2>
-<div class="indicadores-estado">
-    <div class="indicador-estado indicador-verde">
-        <div class="valor"><?= $conteo_estados[VEHICULO_OPERATIVO] ?></div>
+<div class="dash-section-titulo">
+    <span class="dash-live"></span>
+    <span>Estado de la flota (<strong><?= $total_vehiculos ?></strong> vehículos)</span>
+</div>
+<div class="indicadores-estado" id="dash-indicadores">
+    <div class="indicador-estado indicador-verde dash-entrada" style="animation-delay:.1s">
+        <div class="indicador-icono">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 13l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div class="valor" data-contar="<?= $conteo_estados[VEHICULO_OPERATIVO] ?>">0</div>
         <div class="etiqueta">Operativos</div>
     </div>
-    <div class="indicador-estado indicador-amarillo">
-        <div class="valor"><?= $conteo_estados[VEHICULO_MANTENIMIENTO] ?></div>
+    <div class="indicador-estado indicador-amarillo dash-entrada" style="animation-delay:.2s">
+        <div class="indicador-icono">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 8v4l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div class="valor" data-contar="<?= $conteo_estados[VEHICULO_MANTENIMIENTO] ?>">0</div>
         <div class="etiqueta">En mantenimiento</div>
     </div>
-    <div class="indicador-estado indicador-rojo">
-        <div class="valor"><?= $conteo_estados[VEHICULO_FUERA] ?></div>
+    <div class="indicador-estado indicador-rojo dash-entrada" style="animation-delay:.3s">
+        <div class="indicador-icono">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/></svg>
+        </div>
+        <div class="valor" data-contar="<?= $conteo_estados[VEHICULO_FUERA] ?>">0</div>
         <div class="etiqueta">Fuera de servicio</div>
     </div>
 </div>
 
 <div class="paneles-fila">
-    <div class="panel">
+    <div class="panel dash-entrada" style="animation-delay:.4s">
         <div class="panel-header">
             <h2>Turnos en curso</h2>
             <span class="contador"><?= (int)$turnos_activos ?> activos</span>
@@ -115,8 +128,8 @@ require_once __DIR__ . '/../../includes/header.php';
                         <tr><td colspan="4">Sin turnos en curso.</td></tr>
                     <?php else: ?>
                         <?php foreach ($turnos_en_curso as $t): ?>
-                            <tr>
-                                <td><?= e($t['conductor']) ?></td>
+                            <tr class="dash-fila">
+                                <td><span class="dash-conductor"></span> <?= e($t['conductor']) ?></td>
                                 <td><?= e($t['placa']) ?> <small style="color:#99a;">(<?= e($t['id_camion']) ?>)</small></td>
                                 <td><?= e(formatear_duracion((int)$t['minutos_transcurridos'])) ?></td>
                                 <td><?= number_format($t['velocidad_promedio'], 1) ?> km/h</td>
@@ -128,7 +141,7 @@ require_once __DIR__ . '/../../includes/header.php';
         </div>
     </div>
 
-    <div class="panel">
+    <div class="panel dash-entrada" style="animation-delay:.5s">
         <div class="panel-header">
             <h2>Alertas activas</h2>
             <span class="contador<?= $alertas_activas > 0 ? ' contador-alerta' : '' ?>"><?= (int)$alertas_activas ?> activas</span>
@@ -166,10 +179,10 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<div class="panel" style="margin-bottom:24px;">
+<div class="panel dash-entrada" style="animation-delay:.6s; margin-bottom:24px;">
     <div class="panel-header">
         <h2>Estado detallado de la flota</h2>
-        <a href="<?= base_url() ?>/modulos/flota/index.php" style="font-size:12px; color:#2c4a7c; text-decoration:none;">Ver flota completa →</a>
+        <a href="<?= base_url() ?>/modulos/flota/index.php" class="dash-link">Ver flota completa →</a>
     </div>
     <div class="panel-cuerpo">
         <table class="tabla">
@@ -193,7 +206,7 @@ require_once __DIR__ . '/../../includes/header.php';
                             VEHICULO_FUERA         => 'punto-rojo',
                         ][$v['estado_operativo']] ?? 'punto-verde';
                         ?>
-                        <tr>
+                        <tr class="dash-fila">
                             <td><span class="punto-estado <?= $clase_punto ?>"></span><strong><?= e($v['id_camion']) ?></strong> <small style="color:#99a;"><?= e($v['placa']) ?></small></td>
                             <td><?= e($v['marca']) ?> <?= e($v['modelo']) ?></td>
                             <td><?= e($v['estado_operativo']) ?></td>
@@ -205,5 +218,135 @@ require_once __DIR__ . '/../../includes/header.php';
         </table>
     </div>
 </div>
+
+<style>
+/* ---- Dashboard animations & enhancements ---- */
+.dash-header {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    margin-bottom: 22px; animation: dap .6s ease-out;
+}
+.dash-sub { font-size:13px; color:#889; margin-top:2px; }
+.dash-hora {
+    font-size:12px; color:#778; background:#f0f2f6; padding:6px 14px;
+    border-radius:8px; font-variant-numeric: tabular-nums;
+    transition: background .3s;
+}
+.dash-hora:hover { background:#e6eaf0; }
+
+.dash-section-titulo {
+    display:flex; align-items:center; gap:10px;
+    font-size:13px; color:#667; text-transform:uppercase; letter-spacing:.4px;
+    margin-bottom:14px; animation: dap .6s ease-out; animation-delay:.05s; animation-fill-mode:both;
+}
+.dash-live {
+    width:8px; height:8px; border-radius:50%; background:#1c7a3d;
+    animation: dashPulso 1.5s ease-in-out infinite; flex-shrink:0;
+}
+@keyframes dashPulso {
+    0%,100% { box-shadow: 0 0 0 0 rgba(28,122,61,.4); }
+    50%     { box-shadow: 0 0 0 5px rgba(28,122,61,0); }
+}
+
+/* Entrance */
+.dash-entrada {
+    animation: dap .6s ease-out both;
+}
+@keyframes dap {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* Indicator icons */
+.indicador-icono {
+    width:28px; height:28px; margin-bottom:6px;
+}
+.indicador-icono svg { width:100%; height:100%; }
+
+/* Enhanced indicators */
+.indicador-estado {
+    position:relative; overflow:hidden;
+    transition:transform .3s, box-shadow .3s;
+}
+.indicador-estado:hover {
+    transform:translateY(-3px) scale(1.02);
+    box-shadow:0 8px 24px rgba(0,0,0,.1);
+}
+
+/* Panel hover */
+.panel {
+    transition:transform .35s, box-shadow .35s;
+}
+.panel:hover {
+    transform:translateY(-2px);
+    box-shadow:0 8px 28px rgba(0,0,0,.08);
+}
+
+/* Table row hover */
+.dash-fila {
+    transition:background .2s;
+}
+.dash-fila:hover td {
+    background:#f8faff !important;
+}
+
+/* Conductor dot */
+.dash-conductor {
+    display:inline-block; width:7px; height:7px; border-radius:50%;
+    background:#1c7a3d; margin-right:6px; vertical-align:middle;
+}
+
+/* Link stylish */
+.dash-link {
+    font-size:12px; color:#2c4a7c; text-decoration:none;
+    transition:color .2s, transform .2s; display:inline-flex; align-items:center; gap:4px;
+}
+.dash-link:hover { color:#5b8dee; transform:translateX(3px); }
+
+/* Counter animation */
+@keyframes contarSube {
+    from { opacity:0; transform:translateY(8px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+</style>
+
+<script>
+(function(){
+    var d = document;
+
+    // ---- Live clock ----
+    var reloj = d.getElementById('dash-reloj');
+    if (reloj) {
+        function actualizarHora() {
+            var a = new Date();
+            reloj.textContent =
+                String(a.getDate()).padStart(2,'0') + '/' +
+                String(a.getMonth()+1).padStart(2,'0') + '/' +
+                a.getFullYear() + ' ' +
+                String(a.getHours()).padStart(2,'0') + ':' +
+                String(a.getMinutes()).padStart(2,'0');
+        }
+        setInterval(actualizarHora, 10000);
+    }
+
+    // ---- Counter animation ----
+    var indicadores = d.getElementById('dash-indicadores');
+    if (indicadores) {
+        var vals = indicadores.querySelectorAll('.valor[data-contar]');
+        vals.forEach(function(el) {
+            var target = parseInt(el.getAttribute('data-contar'), 10);
+            if (isNaN(target) || target === 0) { el.textContent = target; return; }
+            var dur = 600, paso = Math.ceil(target / 30);
+            var actual = 0;
+            var step = function() {
+                actual += paso;
+                if (actual >= target) { el.textContent = target; return; }
+                el.textContent = actual;
+                setTimeout(step, dur / 30);
+            };
+            setTimeout(step, 400);
+        });
+    }
+})();
+</script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
