@@ -28,7 +28,13 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Usuarios registrados</h2>
+        <span class="contador"><?= count($usuarios) ?> usuarios</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>Usuario (Login)</th>
@@ -49,7 +55,10 @@ require_once __DIR__ . '/../../includes/header.php';
                     <?= e($u['nombre_completo']) ?><br>
                     <small style="color:#667;"><?= e($u['correo']) ?></small>
                 </td>
-                <td><span class="rol-etiqueta"><?= e($u['rol']) ?></span></td>
+                <td>
+                    <?php $ir = ICONOS_ROL[$u['rol']] ?? ICONO_USUARIO_DEFECTO; $cr = CLASES_ROL[$u['rol']] ?? ''; ?>
+                    <span class="rol-etiqueta <?= $cr ?>"><?= $ir ?> <?= e($u['rol']) ?></span>
+                </td>
                 <td>
                     <?php if ($u['tipo_autenticacion'] === AUTH_AD): ?>
                         <span class="badge badge-amarillo" title="Active Directory">AD</span>
@@ -77,7 +86,9 @@ require_once __DIR__ . '/../../includes/header.php';
             </tr>
         <?php endforeach; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <!-- Modal Formulario -->
 <div class="modal-overlay" id="modalForm">

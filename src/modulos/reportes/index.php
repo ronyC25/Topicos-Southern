@@ -88,24 +88,32 @@ require_once __DIR__ . '/../../includes/header.php';
     <?php if (empty($resultados)): ?>
         <p>No se encontraron datos para el rango seleccionado.</p>
     <?php else: ?>
-        <table class="tabla">
-            <thead>
-                <tr>
-                    <?php foreach ($columnas as $col): ?>
-                        <th><?= e($col) ?></th>
-                    <?php endforeach; ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($resultados as $fila): ?>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Resultados</h2>
+                <span class="contador"><?= count($resultados) ?> filas</span>
+            </div>
+            <div class="panel-cuerpo">
+            <table class="tabla">
+                <thead>
                     <tr>
-                        <?php foreach ($fila as $valor): ?>
-                            <td><?= e((string)$valor) ?></td>
+                        <?php foreach ($columnas as $col): ?>
+                            <th><?= e($col) ?></th>
                         <?php endforeach; ?>
                     </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php foreach ($resultados as $fila): ?>
+                        <tr>
+                            <?php foreach ($fila as $valor): ?>
+                                <td><?= e((string)$valor) ?></td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            </div>
+        </div>
     <?php endif; ?>
 <?php endif; ?>
 

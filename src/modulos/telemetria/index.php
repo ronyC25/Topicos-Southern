@@ -17,13 +17,14 @@ $stmt = $pdo->query("
 ");
 $registros = $stmt->fetchAll();
 
-// Extraer la última ubicación conocida por camión para el mapa
+// Extraer la última ubicación conocida por camión para el mapa y los chips de estado
 $ubicaciones_recientes = [];
 $vistos = [];
 foreach ($registros as $r) {
     if (!isset($vistos[$r['id_camion']])) {
         $ubicaciones_recientes[] = [
             'id_camion' => $r['id_camion'],
+            'placa' => $r['placa'],
             'latitud' => (float)$r['latitud'],
             'longitud' => (float)$r['longitud'],
             'velocidad_kmh' => (float)$r['velocidad_kmh']
@@ -35,9 +36,9 @@ foreach ($registros as $r) {
 // Datos falsos por si no hay registros reales, solo para demostrar el mapa
 if (empty($ubicaciones_recientes)) {
     $ubicaciones_recientes = [
-        ['id_camion' => 'CAM-001 (Simulado)', 'latitud' => -17.2185, 'longitud' => -70.9254, 'velocidad_kmh' => 45],
-        ['id_camion' => 'CAM-002 (Simulado)', 'latitud' => -17.2210, 'longitud' => -70.9310, 'velocidad_kmh' => 32],
-        ['id_camion' => 'CAM-003 (Simulado)', 'latitud' => -17.2150, 'longitud' => -70.9200, 'velocidad_kmh' => 0]
+        ['id_camion' => 'CAM-001 (Simulado)', 'placa' => '---', 'latitud' => -17.2185, 'longitud' => -70.9254, 'velocidad_kmh' => 45],
+        ['id_camion' => 'CAM-002 (Simulado)', 'placa' => '---', 'latitud' => -17.2210, 'longitud' => -70.9310, 'velocidad_kmh' => 32],
+        ['id_camion' => 'CAM-003 (Simulado)', 'placa' => '---', 'latitud' => -17.2150, 'longitud' => -70.9200, 'velocidad_kmh' => 0]
     ];
 }
 
@@ -45,25 +46,43 @@ $titulo_pagina = 'Telemetría en Vivo';
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<!-- Librerías de Leaflet para el Mapa -->
+<!--
+    Librerías de Leaflet para el Mapa, cargadas desde un CDN externo (unpkg.com y
+    tile.openstreetmap.org). Si el servidor de producción corre en una red interna
+    sin salida a internet, este mapa no cargará ahí — es una limitación preexistente
+    de cómo está construido el módulo, no introducida por este rediseño.
+-->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
-    <h1 class="titulo-modulo" style="margin-bottom: 0;">Historial y Mapa de Telemetría</h1>
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+    <h1 class="titulo-modulo" style="margin-bottom: 0;">Telemetría en Vivo</h1>
     <button class="boton boton-secundario" onclick="window.location.reload();">Actualizar Datos</button>
 </div>
 
-<div class="tarjeta" style="margin-bottom: 20px; background: #eef0f5; padding: 15px;">
-    <p style="font-size: 13px; color: #556; margin: 0;">
-        <strong>Nota:</strong> Los datos de telemetría (GPS y velocidad) son insertados automáticamente por el hardware de los camiones. Aquí se muestran las últimas ubicaciones y los últimos 100 registros.
-    </p>
+<!-- Chips de estado por vehículo: contexto de un vistazo antes del mapa -->
+<div style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px;">
+    <?php foreach ($ubicaciones_recientes as $u): ?>
+        <?php $clase_chip = $u['velocidad_kmh'] > 40 ? 'badge-rojo' : 'badge-verde'; ?>
+        <span class="badge <?= $clase_chip ?>" style="font-size:13px; padding:6px 12px;">
+            <?= e($u['id_camion']) ?><?= $u['placa'] && $u['placa'] !== '---' ? ' · ' . e($u['placa']) : '' ?> · <?= number_format($u['velocidad_kmh'], 0) ?> km/h
+        </span>
+    <?php endforeach; ?>
 </div>
 
-<!-- Contenedor del Mapa -->
-<div id="mapa-telemetria" style="height: 400px; width: 100%; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ccc;"></div>
+<!-- El mapa es el elemento protagonista de este módulo -->
+<div id="mapa-telemetria" style="height: 520px; width: 100%; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ccc; box-shadow: 0 1px 4px rgba(0,0,0,.06);"></div>
+<p style="font-size: 12px; color: #778; margin-bottom: 20px;">
+    Las ubicaciones GPS y la velocidad son insertadas automáticamente por el hardware de los camiones. <?= empty($registros) ? 'No hay datos reales aún — se muestran ubicaciones simuladas.' : '' ?>
+</p>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Historial de telemetría</h2>
+        <span class="contador"><?= count($registros) ?> registros</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>Fecha/Hora</th>
@@ -79,22 +98,22 @@ require_once __DIR__ . '/../../includes/header.php';
         <?php else: ?>
             <?php foreach ($registros as $r): ?>
                 <tr>
-                    <td><?= e($r['fecha_registro']) ?></td>
-                    <td>
+                    <td data-label="Fecha/Hora"><?= e($r['fecha_registro']) ?></td>
+                    <td data-label="Camión">
                         <strong><?= e($r['id_camion']) ?></strong><br>
                         <small style="color:#667;"><?= e($r['placa']) ?></small>
                     </td>
-                    <td>
+                    <td data-label="Conductor">
                         <?= e($r['conductor'] ?: 'Desconocido') ?><br>
                         <small style="color:#667;">Turno #<?= e($r['id_turno']) ?></small>
                     </td>
-                    <td>
+                    <td data-label="GPS">
                         <a href="https://maps.google.com/?q=<?= $r['latitud'] ?>,<?= $r['longitud'] ?>" target="_blank" style="color: #2c4a7c; text-decoration: none;">
                             <?= $r['latitud'] ?>, <?= $r['longitud'] ?> 📍
                         </a>
                     </td>
-                    <td>
-                        <?php 
+                    <td data-label="Velocidad">
+                        <?php
                         $vel = $r['velocidad_kmh'];
                         $color = $vel > 40 ? 'color: #a33; font-weight: bold;' : 'color: #1c7a3d;';
                         ?>
@@ -104,7 +123,9 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <script>
     // Inicializar el mapa centrado en el primer camión, o en una ubicación por defecto
@@ -113,7 +134,7 @@ require_once __DIR__ . '/../../includes/header.php';
     var centroLng = datosIniciales.length > 0 ? datosIniciales[0].longitud : -70.9254;
 
     var map = L.map('mapa-telemetria').setView([centroLat, centroLng], 14);
-    
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '© OpenStreetMap contributors'

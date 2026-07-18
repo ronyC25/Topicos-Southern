@@ -32,17 +32,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
     <h1 class="titulo-modulo" style="margin-bottom: 0;">Bandeja de Alertas</h1>
-    
-    <div>
-        <form method="GET" style="display: inline-block;">
-            <select name="estado" onchange="this.form.submit()" style="padding: 6px; border-radius: 4px; border: 1px solid #ccc;">
-                <option value="Activa" <?= $estado_filtro === 'Activa' ? 'selected' : '' ?>>Solo Activas</option>
-                <option value="Todas" <?= $estado_filtro === 'Todas' ? 'selected' : '' ?>>Todas</option>
-                <option value="Resuelta" <?= $estado_filtro === 'Resuelta' ? 'selected' : '' ?>>Resueltas</option>
-                <option value="Descartada" <?= $estado_filtro === 'Descartada' ? 'selected' : '' ?>>Descartadas</option>
-            </select>
-        </form>
-    </div>
 </div>
 
 <?php if (isset($_GET['msg'])): ?>
@@ -56,7 +45,23 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Alertas</h2>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <form method="GET" style="display: inline-block;">
+                <select name="estado" onchange="this.form.submit()" style="padding: 5px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px;">
+                    <option value="Activa" <?= $estado_filtro === 'Activa' ? 'selected' : '' ?>>Solo Activas</option>
+                    <option value="Todas" <?= $estado_filtro === 'Todas' ? 'selected' : '' ?>>Todas</option>
+                    <option value="Resuelta" <?= $estado_filtro === 'Resuelta' ? 'selected' : '' ?>>Resueltas</option>
+                    <option value="Descartada" <?= $estado_filtro === 'Descartada' ? 'selected' : '' ?>>Descartadas</option>
+                </select>
+            </form>
+            <span class="contador<?= $estado_filtro === 'Activa' && count($alertas) > 0 ? ' contador-alerta' : '' ?>"><?= count($alertas) ?></span>
+        </div>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>Fecha</th>
@@ -132,6 +137,8 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

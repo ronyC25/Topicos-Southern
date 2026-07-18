@@ -37,7 +37,13 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Conductores registrados</h2>
+        <span class="contador"><?= count($conductores) ?> conductores</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>DNI (Usuario)</th>
@@ -83,7 +89,9 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <!-- Modal Formulario -->
 <div class="modal-overlay" id="modalForm">

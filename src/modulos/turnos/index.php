@@ -50,7 +50,13 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Turnos registrados</h2>
+        <span class="contador"><?= count($turnos) ?> turnos</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>ID</th>
@@ -67,22 +73,22 @@ require_once __DIR__ . '/../../includes/header.php';
         <?php else: ?>
             <?php foreach ($turnos as $t): ?>
                 <tr>
-                    <td><strong>#<?= e($t['id_turno']) ?></strong></td>
-                    <td>
+                    <td data-label="ID"><strong>#<?= e($t['id_turno']) ?></strong></td>
+                    <td data-label="Conductor">
                         <?= e($t['conductor_nombre']) ?><br>
                         <small style="color:#667;">DNI: <?= e($t['dni_conductor']) ?></small>
                     </td>
-                    <td>
+                    <td data-label="Vehículo">
                         <?= e($t['vehiculo_placa']) ?><br>
                         <small style="color:#667;"><?= e($t['id_camion']) ?> (<?= e($t['modelo']) ?>)</small>
                     </td>
-                    <td>
+                    <td data-label="Inicio / Fin">
                         <small>
                             <strong>Ini:</strong> <?= e($t['hora_inicio']) ?><br>
                             <strong>Fin:</strong> <?= $t['hora_fin'] ? e($t['hora_fin']) : '---' ?>
                         </small>
                     </td>
-                    <td>
+                    <td data-label="Estado">
                         <?php
                         $clase_estado = [
                             'Activo' => 'badge-verde',
@@ -93,7 +99,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         ?>
                         <span class="badge <?= $clase_estado ?>"><?= e($t['estado_turno']) ?></span>
                     </td>
-                    <td style="text-align: right;">
+                    <td data-label="Acciones" style="text-align: right;">
                         <?php if ($t['estado_turno'] === 'Activo' || $t['estado_turno'] === 'Pausado'): ?>
                             <button class="boton boton-secundario" style="padding: 5px 10px; font-size: 12px;" onclick='abrirModalDescanso(<?= $t["id_turno"] ?>)'>Descanso</button>
                             <form action="cambiar_estado.php" method="POST" style="display:inline;">
@@ -119,7 +125,9 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <?php if (!$es_conductor): ?>
 <!-- Modal Iniciar Turno -->

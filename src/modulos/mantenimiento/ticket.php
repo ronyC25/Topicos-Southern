@@ -51,6 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: index.php?msg=' . urlencode("Ticket actualizado exitosamente."));
             exit;
         }
+    } catch (PDOException $e) {
+        manejar_error_bd($e, 'mantenimiento/ticket');
     } catch (Exception $e) {
         header('Location: index.php?error=' . urlencode($e->getMessage()));
         exit;

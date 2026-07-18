@@ -46,12 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     } catch (PDOException $e) {
         if ($e->getCode() == 23000) {
-            $error = "El DNI ya se encuentra registrado.";
-        } else {
-            $error = "Error de base de datos: " . $e->getMessage();
+            header('Location: index.php?error=' . urlencode("El DNI ya se encuentra registrado."));
+            exit;
         }
-        header('Location: index.php?error=' . urlencode($error));
-        exit;
+        manejar_error_bd($e, 'conductores/guardar');
     }
 } else {
     header('Location: index.php');

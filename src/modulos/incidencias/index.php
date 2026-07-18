@@ -47,7 +47,13 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Incidencias</h2>
+        <span class="contador"><?= count($incidencias) ?> registradas</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>ID / Turno</th>
@@ -63,15 +69,15 @@ require_once __DIR__ . '/../../includes/header.php';
         <?php else: ?>
             <?php foreach ($incidencias as $i): ?>
                 <tr>
-                    <td>
+                    <td data-label="ID / Turno">
                         <strong>#<?= e($i['id_incidencia']) ?></strong><br>
                         <small style="color:#667;">Turno #<?= e($i['id_turno']) ?><br>Camión: <?= e($i['id_camion']) ?></small>
                     </td>
-                    <td>
+                    <td data-label="Detalles">
                         <small style="color:#667;"><?= e($i['fecha_reporte']) ?> por <?= e($i['reportado_por']) ?></small><br>
                         <?= e($i['descripcion']) ?>
                     </td>
-                    <td>
+                    <td data-label="Severidad">
                         <?php
                         $clase_sev = [
                             'Baja' => 'badge-verde',
@@ -82,7 +88,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         ?>
                         <span class="badge <?= $clase_sev ?>"><?= e($i['nivel_severidad']) ?></span>
                     </td>
-                    <td>
+                    <td data-label="Estado">
                         <?php
                         $clase_est = [
                             'Pendiente' => 'badge-rojo',
@@ -93,7 +99,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         ?>
                         <span class="badge <?= $clase_est ?>"><?= e($i['estado_atencion']) ?></span>
                     </td>
-                    <td style="text-align: right;">
+                    <td data-label="Acciones" style="text-align: right;">
                         <?php if (!$es_conductor && $i['estado_atencion'] !== 'Cerrada'): ?>
                             <button class="boton boton-secundario" style="padding: 5px 10px; font-size: 12px;" onclick='abrirModalEstado(<?= $i["id_incidencia"] ?>, "<?= e($i["estado_atencion"]) ?>")'>Actualizar Estado</button>
                         <?php else: ?>
@@ -104,7 +110,9 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <!-- Modal Nueva Incidencia -->
 <div class="modal-overlay" id="modalForm">

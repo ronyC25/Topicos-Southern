@@ -35,8 +35,13 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 <?php endif; ?>
 
-<h2 style="font-size:16px; margin-bottom:12px; margin-top:20px;">Registros de Mantenimiento</h2>
-<table class="tabla">
+<div class="panel" style="margin-bottom:24px;">
+    <div class="panel-header">
+        <h2>Registros de Mantenimiento</h2>
+        <span class="contador"><?= count($mantenimientos) ?> registros</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>ID / Camión</th>
@@ -99,10 +104,17 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
-<h2 style="font-size:16px; margin-bottom:12px; margin-top:40px;">Tickets de Atención</h2>
-<table class="tabla">
+<div class="panel">
+    <div class="panel-header">
+        <h2>Tickets de Atención</h2>
+        <span class="contador"><?= count($tickets) ?> tickets</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
     <thead>
         <tr>
             <th>Ticket / Camión</th>
@@ -163,7 +175,9 @@ require_once __DIR__ . '/../../includes/header.php';
             <?php endforeach; ?>
         <?php endif; ?>
     </tbody>
-</table>
+    </table>
+    </div>
+</div>
 
 <!-- Modal Nuevo Mantenimiento -->
 <div class="modal-overlay" id="modalMant">

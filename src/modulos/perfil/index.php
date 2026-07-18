@@ -35,7 +35,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="tarjeta" style="margin-bottom: 20px;">
         <h2 style="font-size: 16px; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px;">Información de la Cuenta</h2>
         
-        <div style="display: grid; grid-template-columns: 120px 1fr; gap: 10px; font-size: 14px;">
+        <div class="perfil-datos-grid" style="font-size: 14px;">
             <strong style="color: #667;">Usuario:</strong>
             <div><?= e($usuario['nombre_usuario']) ?></div>
             
@@ -43,7 +43,10 @@ require_once __DIR__ . '/../../includes/header.php';
             <div><?= e($usuario['nombre_completo']) ?></div>
             
             <strong style="color: #667;">Rol:</strong>
-            <div><span class="rol-etiqueta"><?= e($usuario['rol']) ?></span></div>
+            <div>
+                <?php $ir = ICONOS_ROL[$usuario['rol']] ?? ICONO_USUARIO_DEFECTO; $cr = CLASES_ROL[$usuario['rol']] ?? ''; ?>
+                <span class="rol-etiqueta <?= $cr ?>"><?= $ir ?> <?= e($usuario['rol']) ?></span>
+            </div>
             
             <strong style="color: #667;">Correo:</strong>
             <div><?= e($usuario['correo'] ?: 'No registrado') ?></div>

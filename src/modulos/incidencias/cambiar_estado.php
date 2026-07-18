@@ -23,8 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php?msg=' . urlencode("Estado de la incidencia actualizado."));
         exit;
     } catch (PDOException $e) {
-        header('Location: index.php?error=' . urlencode("Error de BD: " . $e->getMessage()));
-        exit;
+        manejar_error_bd($e, 'incidencias/cambiar_estado');
     }
 } else {
     header('Location: index.php');

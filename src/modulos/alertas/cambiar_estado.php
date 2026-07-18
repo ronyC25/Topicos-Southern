@@ -26,8 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php?msg=' . urlencode("Alerta marcada como " . $nuevo_estado));
         exit;
     } catch (PDOException $e) {
-        header('Location: index.php?error=' . urlencode("Error de BD: " . $e->getMessage()));
-        exit;
+        manejar_error_bd($e, 'alertas/cambiar_estado');
     }
 } else {
     header('Location: index.php');

@@ -85,3 +85,13 @@ function validar_csrf(): void {
 function e(?string $texto): string {
     return htmlspecialchars($texto ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+/**
+ * Registra el detalle del error en el log del servidor y redirige
+ * al usuario con un mensaje genérico (nunca exponer $e->getMessage()).
+ */
+function manejar_error_bd(PDOException $e, string $contexto = ''): void {
+    error_log("FleetCore BD" . ($contexto ? " [$contexto]" : '') . ": " . $e->getMessage());
+    header('Location: index.php?error=' . urlencode('Error al procesar la solicitud. Contacte al administrador.'));
+    exit;
+}

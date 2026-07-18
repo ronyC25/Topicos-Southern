@@ -45,14 +45,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         header('Location: index.php?msg=' . urlencode($msg));
         exit;
     } catch (PDOException $e) {
-        // Error de clave duplicada
         if ($e->getCode() == 23000) {
-            $error = "El ID del camión ya existe en el sistema.";
-        } else {
-            $error = "Error de base de datos: " . $e->getMessage();
+            header('Location: index.php?error=' . urlencode("El ID del camión ya existe en el sistema."));
+            exit;
         }
-        header('Location: index.php?error=' . urlencode($error));
-        exit;
+        manejar_error_bd($e, 'flota/guardar');
     }
 } else {
     header('Location: index.php');

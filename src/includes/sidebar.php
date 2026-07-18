@@ -14,7 +14,8 @@ if (preg_match('#/modulos/([^/]+)/#', $_SERVER['SCRIPT_NAME'], $m)) {
         <?php foreach ($modulos_visibles as $mod): ?>
             <li class="<?= $mod === $modulo_actual ? 'activo' : '' ?>">
                 <a href="<?= base_url() ?>/modulos/<?= $mod ?>/index.php">
-                    <?= e(NOMBRES_MODULOS[$mod] ?? ucfirst($mod)) ?>
+                    <?= ICONOS_MODULO[$mod] ?? '' ?>
+                    <span><?= e(NOMBRES_MODULOS[$mod] ?? ucfirst($mod)) ?></span>
                 </a>
             </li>
         <?php endforeach; ?>
