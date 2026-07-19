@@ -142,4 +142,84 @@ fleetcore/
    y reiniciar Apache
 5. **No definir MODO_DESARROLLO** — al no existir la variable, el login de los
    admins usa LDAP real contra spcc.local automáticamente
-6. Acceso para todos: `http://192.168.10.10:8080/fleetcore`
+6. Habilitar HTTPS (**obligatorio** para que Telemetría funcione desde el celular
+   del conductor — ver "HTTPS para telemetría móvil" más abajo)
+7. Acceso para todos: `http://192.168.10.10:8080/fleetcore`
+   Acceso para Conductor (telemetría): `https://192.168.10.10:8443/fleetcore`
+
+---
+
+## HTTPS para telemetría móvil (por qué y cómo)
+
+El módulo de Telemetría envía la ubicación del conductor automáticamente desde
+el navegador de su celular mientras su turno está `Activo` (`turnos/index.php`
++ `turnos/registrar_ubicacion.php`, usando `navigator.geolocation`). Los
+navegadores solo permiten esta API en un **contexto seguro**: `https://` o
+`localhost`. En Docker (`http://localhost:8080`) funciona sin hacer nada
+porque `localhost` está exento. En el servidor real, sobre `http://192.168.10.10:8080`,
+el navegador del celular **bloquea la geolocalización** — por eso hace falta
+HTTPS ahí, aunque sea con un certificado autofirmado.
+
+No hay dominio público ni salida entrante a internet para este servidor, así
+que se usa un **certificado autofirmado directo sobre la IP** (no una CA
+pública, no un hostname interno) — cada celular acepta la advertencia de
+"conexión no privada" una sola vez y el navegador lo recuerda.
+
+### Pasos en el servidor (una sola vez)
+
+**1. Generar el certificado** (10 años de vigencia) con el OpenSSL que trae XAMPP:
+```cmd
+cd C:\xampp\apache\bin
+openssl req -x509 -nodes -newkey rsa:2048 -keyout dispatch.key -out dispatch.crt -days 3650 -subj "/CN=192.168.10.10" -addext "subjectAltName=IP:192.168.10.10"
+```
+El `subjectAltName=IP:...` es obligatorio — Chrome y Safari rechazan certificados
+para una IP que solo tengan el `CN` sin `SAN`.
+
+**2. Copiar el certificado a las carpetas de Apache:**
+```cmd
+copy dispatch.crt C:\xampp\apache\conf\ssl.crt\
+copy dispatch.key C:\xampp\apache\conf\ssl.key\
+```
+
+**3. Habilitar `mod_ssl`** — en `C:\xampp\apache\conf\httpd.conf`, descomentar:
+```
+LoadModule ssl_module modules/mod_ssl.so
+Include conf/extra/httpd-ssl.conf
+```
+
+**4. Editar `C:\xampp\apache\conf\extra\httpd-ssl.conf`** — usar el puerto `8443`
+(mismo patrón que el 8080 en vez del 80 estándar, para no chocar con nada que
+ya use el 443 en ese Windows):
+```
+Listen 8443
+<VirtualHost _default_:8443>
+    DocumentRoot "C:/xampp/htdocs"
+    ServerName 192.168.10.10:8443
+    SSLEngine on
+    SSLCertificateFile "conf/ssl.crt/dispatch.crt"
+    SSLCertificateKeyFile "conf/ssl.key/dispatch.key"
+</VirtualHost>
+```
+
+**5. Reiniciar Apache** desde el Panel de Control de XAMPP (Stop → Start). Si no
+arranca, revisar `C:\xampp\apache\logs\error.log` (lo más común: puerto ocupado
+o ruta del certificado mal escrita).
+
+**6. Probar desde el celular del conductor:** abrir `https://192.168.10.10:8443/fleetcore`.
+Va a salir "conexión no privada" — es esperado por ser autofirmado. Tocar
+**Avanzado → Continuar de todas formas** (Chrome/Android) o **Mostrar detalles
+→ visitar este sitio web** (Safari/iOS). El navegador recuerda la excepción
+por dispositivo — no hay que repetirlo en cada visita.
+
+**7. (Opcional, elimina la advertencia) instalar el certificado como confiable**
+en cada celular:
+- Android: enviar `dispatch.crt` al teléfono → Ajustes → Seguridad → Cifrado
+  y credenciales → Instalar un certificado (CA).
+- iPhone: enviar el archivo (AirDrop/correo) → abrirlo instala un perfil →
+  Ajustes → General → Información → Confianza de certificados → activarlo.
+
+### Pendiente relacionado, no resuelto a propósito
+Con HTTPS ya disponible, en algún momento conviene apagar el acceso HTTP puro
+(8080) o dejar de usarlo para el login — hoy las contraseñas viajan sin cifrar
+por la red de la mina. No se hizo como parte de este cambio porque no fue lo
+pedido; es una mejora de seguridad natural una vez esto esté funcionando.

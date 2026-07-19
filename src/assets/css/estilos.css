@@ -332,12 +332,19 @@ body::after {
     transform: scale(1.15);
 }
 
-/* Colores distintivos por rol */
-.rol-admin-servidor  { background: linear-gradient(135deg, rgba(230, 238, 251, .15), rgba(208, 226, 247, .1)); color: #b8d0f0; }
-.rol-admin-bd        { background: linear-gradient(135deg, rgba(239, 231, 251, .15), rgba(224, 208, 247, .1)); color: #d0c0f0; }
-.rol-admin-telemetria{ background: linear-gradient(135deg, rgba(227, 246, 247, .15), rgba(200, 238, 240, .1)); color: #a0e0e0; }
-.rol-operador        { background: linear-gradient(135deg, rgba(234, 243, 253, .15), rgba(214, 232, 251, .1)); color: #c0d8f0; }
-.rol-conductor       { background: linear-gradient(135deg, rgba(245, 236, 225, .15), rgba(236, 223, 207, .1)); color: #e8c8a0; }
+/* Colores distintivos por rol — versión legible sobre fondo blanco (usuarios/index.php, perfil/index.php) */
+.rol-admin-servidor  { background: #e6eefb; color: #1a2a45; }
+.rol-admin-bd        { background: #efe7fb; color: #5b3a96; }
+.rol-admin-telemetria{ background: #e3f6f7; color: #0f7a80; }
+.rol-operador        { background: #eaf3fd; color: #2c4a7c; }
+.rol-conductor       { background: #f5ece1; color: #8a5a2b; }
+
+/* Mismos roles, versión pastel translúcida solo para el topbar oscuro (.barra-superior, fondo #1a2a45) */
+.barra-superior .rol-admin-servidor  { background: linear-gradient(135deg, rgba(230, 238, 251, .15), rgba(208, 226, 247, .1)); color: #b8d0f0; }
+.barra-superior .rol-admin-bd        { background: linear-gradient(135deg, rgba(239, 231, 251, .15), rgba(224, 208, 247, .1)); color: #d0c0f0; }
+.barra-superior .rol-admin-telemetria{ background: linear-gradient(135deg, rgba(227, 246, 247, .15), rgba(200, 238, 240, .1)); color: #a0e0e0; }
+.barra-superior .rol-operador        { background: linear-gradient(135deg, rgba(234, 243, 253, .15), rgba(214, 232, 251, .1)); color: #c0d8f0; }
+.barra-superior .rol-conductor       { background: linear-gradient(135deg, rgba(245, 236, 225, .15), rgba(236, 223, 207, .1)); color: #e8c8a0; }
 
 .cerrar-sesion {
     display: inline-flex;

@@ -28,6 +28,17 @@ $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $turnos = $stmt->fetchAll();
 
+// Turno activo del conductor logueado: dispara el envío de ubicación (ver script al final).
+$turno_activo_conductor = null;
+if ($es_conductor) {
+    foreach ($turnos as $t) {
+        if ($t['estado_turno'] === 'Activo') {
+            $turno_activo_conductor = $t;
+            break;
+        }
+    }
+}
+
 $titulo_pagina = 'Gestión de Turnos';
 require_once __DIR__ . '/../../includes/header.php';
 ?>
@@ -227,5 +238,51 @@ function cerrarModalDescanso() {
     document.getElementById('modalDescanso').style.display = 'none';
 }
 </script>
+
+<?php if ($es_conductor && $turno_activo_conductor): ?>
+<script>
+// Envía la ubicación del conductor mientras su turno esté Activo, a intervalos
+// (no en cada evento del GPS, para no saturar la tabla telemetria con puntos).
+(function () {
+    if (!('geolocation' in navigator)) return;
+
+    var csrfToken = '<?= csrf_token() ?>';
+    var intervaloMinimoMs = 15000;
+    var ultimoEnvio = 0;
+    var enviando = false;
+
+    function enviarUbicacion(pos) {
+        var ahora = Date.now();
+        if (enviando || (ahora - ultimoEnvio) < intervaloMinimoMs) return;
+        ultimoEnvio = ahora;
+        enviando = true;
+
+        var velocidadKmh = (pos.coords.speed !== null && pos.coords.speed !== undefined)
+            ? pos.coords.speed * 3.6
+            : 0;
+
+        var datos = new URLSearchParams();
+        datos.set('csrf_token', csrfToken);
+        datos.set('latitud', pos.coords.latitude);
+        datos.set('longitud', pos.coords.longitude);
+        datos.set('velocidad_kmh', velocidadKmh);
+
+        fetch('registrar_ubicacion.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: datos.toString()
+        }).catch(function (err) {
+            console.warn('No se pudo enviar la ubicación:', err);
+        }).finally(function () {
+            enviando = false;
+        });
+    }
+
+    navigator.geolocation.watchPosition(enviarUbicacion, function (err) {
+        console.warn('No se pudo obtener la ubicación del dispositivo:', err.message);
+    }, { enableHighAccuracy: true, maximumAge: 10000, timeout: 15000 });
+})();
+</script>
+<?php endif; ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

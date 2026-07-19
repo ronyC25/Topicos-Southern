@@ -41,10 +41,10 @@ const LDAP_DOMINIO  = 'spcc.local';
 
 // ------ Módulos visibles por rol (usado por includes/sidebar.php) ------
 const MENU_POR_ROL = [
-    ROL_ADMIN_SERVIDOR   => ['dashboard','flota','conductores','mantenimiento','reportes','usuarios','perfil'],
+    ROL_ADMIN_SERVIDOR   => ['dashboard','flota','conductores','turnos','incidencias','mantenimiento','reportes','usuarios','perfil'],
     ROL_ADMIN_BD         => ['dashboard','mantenimiento','reportes','perfil'],
     ROL_ADMIN_TELEMETRIA => ['dashboard','telemetria','alertas','reportes','perfil'],
-    ROL_OPERADOR         => ['dashboard','flota','turnos','alertas','incidencias','perfil'],
+    ROL_OPERADOR         => ['dashboard','flota','turnos','alertas','incidencias','reportes','perfil'],
     ROL_CONDUCTOR        => ['turnos','incidencias','perfil'],
 ];
 

@@ -66,7 +66,7 @@ Commit directly to `main` — no feature-branch/PR convention is in use for this
 
 ## Estado del proyecto (última sesión)
 
-Todo lo de abajo está aplicado en el **working tree pero sin commitear** (`git status` lo confirma) — si vuelves a este proyecto y `git log` no muestra estos cambios, no se perdieron: solo falta el `git add`/`commit`.
+Todo lo de abajo ya está commiteado en `main` (commit `3b57208` — "Rediseno visual completo estilo sala de control + fixes de seguridad").
 
 **Hecho:**
 1. **Fix de 2 inconsistencias reales** encontradas en revisión de código: extensión `ldap` faltante en `Dockerfile` (agregada), y 11 archivos que exponían `$e->getMessage()` al usuario (reemplazados por `manejar_error_bd()` en `src/auth/sesion.php`).
@@ -75,7 +75,19 @@ Todo lo de abajo está aplicado en el **working tree pero sin commitear** (`git 
 4. **Rediseño aplicado a los 11 módulos**: dashboard con semáforo de flota + paneles densos; el mismo lenguaje (`.panel` con cabecera+contador) llevado a `flota`, `conductores`, `turnos`, `alertas`, `incidencias`, `usuarios`, `reportes`, `mantenimiento`; `telemetria` reenfocado en el mapa (mapa a 520px, chips de estado, historial degradado a panel secundario); vista móvil responsive aplicada a los 3 módulos que usa el rol Conductor (`turnos`, `incidencias`, `perfil`).
 5. Verificado en vivo contra Docker con los 5 roles reales (capturas de pantalla escritorio + móvil vía Edge headless) — sin errores PHP en logs.
 
+**Actualización 2026-07-18:** un compañero descargó el repo, aplicó otro pase de rediseño visual (login/dashboard/header/sidebar con animaciones, favicon, `global.js`) y subió el commit `1db802d` ("Actualización de diseños"), ya traído a este working tree via `git pull`. Revisión de ese diff encontró:
+- `src/config/conexion.php` cambió el fallback de `DB_USER`/`DB_PASS` de `spcc_app`/`AppSpcc_2026*` a `root`/`` (vacío) — **confirmado con el usuario que son las credenciales reales que están configuradas en el servidor actualmente, no tocar.**
+- El módulo trajo ~30 colores hex nuevos no documentados en `DESIGN.md` — pendiente de reflejar en la paleta (ver DESIGN.md, sección de paleta ampliada).
+- `telemetria/index.php` sigue dependiendo de Leaflet/OpenStreetMap vía CDN externo, pero el usuario confirmó que el servidor de producción **sí tiene salida a internet** (comparte datos de un teléfono; configuración de red documentada en `Reiniciar Server 1.pdf`, que no se lee/edita por instrucción de este archivo). No es un problema real, se puede dejar de mencionar como pendiente.
+- El desfase entre `MENU_POR_ROL` y los `verificar_rol()` reales — **ya corregido**, ver `ROLES_Y_PERMISOS.md` sección 4: se agregó `turnos`/`incidencias` al menú de Admin_Servidor y `reportes` al de Operador; se removió el acceso de código de Admin_Servidor a `telemetria` (queda exclusivo de Admin_Telemetria).
+
 **Pendiente / no resuelto a propósito (mencionado al usuario, sin acción pedida):**
-- `telemetria/index.php` carga Leaflet + tiles de OpenStreetMap desde CDN externo (`unpkg.com`) — no funcionará si el servidor de producción no tiene salida a internet. Está comentado en el propio archivo.
-- El desfase entre `MENU_POR_ROL` y los `verificar_rol()` reales (punto 2 arriba) sigue sin sincronizar.
 - El usuario preguntó si quería empujar el diseño hacia un sidebar oscuro/mayor densidad (inspirado en una referencia tipo Groundhog SIC & FMS) y respondió que el diseño actual está bien — no se tocó la paleta ni la densidad general.
+
+**Actualización 2026-07-19 — telemetría en vivo desde el celular del conductor:**
+- Se creó `MANUAL_SISTEMA.md` (raíz del repo) — documento explicativo del sistema completo para el equipo (roles, módulos, modelo de datos, despliegue, seguridad, limitaciones) pensado para quien no trabajó a fondo en el desarrollo. Punto de entrada antes de leer `ROLES_Y_PERMISOS.md`/`DESIGN.md`/este archivo.
+- Al revisar el módulo de Telemetría con el usuario, se confirmó que **no existía ninguna ingesta real de GPS** — `telemetria/index.php` solo leía la tabla, y un comentario en el código asumía (incorrectamente) que "el hardware de los camiones" insertaba los datos. La idea real del usuario: el celular del conductor, logueado con su rol, empieza a enviar su posición en cuanto su turno pasa a `Activo`.
+- **Implementado:** `src/modulos/turnos/registrar_ubicacion.php` (endpoint nuevo, solo rol Conductor + CSRF, valida turno `Activo` propio antes de insertar en `telemetria`) + JS en `src/modulos/turnos/index.php` (`navigator.geolocation.watchPosition()`, throttle de 15s, solo se renderiza si el Conductor tiene turno activo). Verificado end-to-end en Docker con curl real (login, iniciar turno, POST de ubicación, verificación en `telemetria/index.php`, casos de error CSRF/coordenadas/rol) — sin tocar datos de prueba de forma permanente.
+- **Bloqueante real descubierto:** `navigator.geolocation` exige un "contexto seguro" (`https://` o `localhost`) — en Docker funciona gratis, pero en el servidor real (`http://192.168.10.10:8080`, HTTP plano) el navegador del celular lo bloquearía. Se decidió con el usuario (vía pregunta explícita) resolverlo con un **certificado autofirmado directo sobre la IP** (no CA local/mkcert, no Let's Encrypt — no hay control confirmado del DNS interno). Instrucciones completas documentadas en `README.md`, sección "HTTPS para telemetría móvil" (puerto `8443`, comando `openssl` con `subjectAltName=IP:...` ya validado dentro de un contenedor).
+- **Hallazgo de datos de prueba, no corregido a propósito:** `conductor.prueba` tiene `dni = NULL` en `sql/02_ajustes_y_datos_prueba.sql` — nunca puede ver un turno propio (independiente de este cambio). Si alguien quiere demostrar este flujo en un navegador real, hay que corregir ese `dni` en la semilla o usar un conductor con turno activo real.
+- **Pendiente mencionado, no resuelto:** una vez HTTPS esté andando en el servidor real, apagar/dejar de usar el acceso HTTP puro (8080) para el login, porque hoy las contraseñas viajan sin cifrar por la red de la mina. No se pidió, no se tocó.

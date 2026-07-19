@@ -31,6 +31,20 @@ Todos los valores están tomados literal de `estilos.css`/`login.css`. No existe
 
 Estos 4 pares son los únicos colores de estado en todo el sistema. Cualquier badge o mensaje nuevo debe mapear a uno de estos cuatro — no inventar un quinto color de estado.
 
+### Paleta ampliada (rediseño 2026-07 — animaciones, gradientes, topbar oscuro)
+
+Un segundo pase de rediseño (commit `1db802d`) agregó colores nuevos, todos decorativos/de soporte — no son un segundo set de estado, no reemplazan la paleta original:
+
+| Uso | Hex | Dónde se usa |
+|---|---|---|
+| Gradiente de fondo del topbar (extremo oscuro) | `#0f1a2e` | `.barra-superior` — gradiente `135deg, #0f1a2e, #1a2a45` (antes era el sólido `#1a2a45`) |
+| Azul de acento (hover/gradientes decorativos) | `#5b8dee` | brillo de `.marca-glow`, gradiente de `.logo-icono`/campos del login, hover de `.dash-link` |
+| Fondo de página del login (gradiente sutil) | `#e8ecf2`, `#dce1ea`, `#d4dae6` | fondo `body` de `index.php` (login) |
+| Grises de superficie/hover (paneles, scrollbar, bordes) | `#f5f7fb`, `#f8faff`, `#f8f9fc`, `#fafbfc`, `#fafbfd`, `#e6eaf0`, `#e6eefb`, `#f0f4ff`, `#d0d4e0`, `#b0b8c4`, `#c8ceda` | hover de `.panel`/`.dash-fila`, `.panel-cuerpo::-webkit-scrollbar-thumb`, bordes de `.menu-lateral` |
+| Textos secundarios nuevos | `#889`, `#aab`, `#b8c0cc`, `#556`, `#333` | subtítulos (`.dash-sub`), variantes de `.tabla`/`.pie-pagina` |
+
+Si vas a agregar más color decorativo en esta línea (gradientes, glows, hovers), reusa uno de los de arriba antes de inventar uno nuevo. Los 4 pares de estado (verde/amarillo/rojo/gris) y la paleta base de marca (`#1a2a45`/`#2c4a7c`/`#7ab0ff`) siguen siendo intocables — este bloque es solo para efectos decorativos añadidos encima.
+
 ## Tipografía
 
 Una sola familia en todo el sistema: `'Segoe UI', Arial, sans-serif` (declarada en `body`). No hay una escala tipográfica formal; los tamaños usados en la práctica son:
@@ -72,6 +86,8 @@ $clase_rol  = CLASES_ROL[$rol_actual] ?? '';
 **Los íconos de la barra superior son SVG de línea inline (monocromos, `stroke="currentColor"`, sin relleno)** — no una librería externa (no hay Font Awesome ni sprite descargado; coherente con "sin build step, sin CDN", y la red de la mina es interna/sin internet), pero tampoco emoji: se reemplazaron a propósito por líneas simples porque el emoji se ve informal e inconsistente entre Windows/Mac/navegadores para una herramienta de sala de control. Como `currentColor` hereda el color del texto que lo rodea, cada ícono de rol adopta automáticamente el color de su `.rol-etiqueta` sin CSS adicional. Para un ícono nuevo, seguir el mismo patrón: `viewBox="0 0 24 24"`, `stroke="currentColor"`, `stroke-width="2"`, trazo simple (rect/circle/path), y agregarlo como constante en `constantes.php` — no usar emoji para chrome de interfaz (nombre de rol, logout, acciones de la topbar). El emoji suelto que ya existía en `acceso_denegado.php` (⛔) queda como está — no se tocó porque no se pidió, pero no es el patrón a seguir para íconos nuevos.
 
 Los colores de `.rol-etiqueta` (`rol-admin-servidor`, `rol-admin-bd`, `rol-admin-telemetria`, `rol-operador`, `rol-conductor`, en `estilos.css`) son un set de identidad **separado** de los 4 colores de estado (verde/amarillo/rojo/gris de los badges) — no reutilizan esos pares a propósito, para que un rol nunca se confunda visualmente con un estado operativo (ej. el amarillo de "Admin_Telemetria" no debe leerse como "Mantenimiento"). Si se agrega un rol nuevo, sumar su entrada en `ICONOS_ROL`/`CLASES_ROL` y un par bg/texto nuevo aquí, evitando los 4 pares reservados a estado.
+
+**Cada clase `.rol-*` tiene dos variantes, según el fondo donde aparece** (agregado en el rediseño 2026-07, tras un bug de contraste): la regla base (`.rol-admin-servidor`, etc.) usa fondo sólido claro + texto oscuro — legible sobre blanco, para cuando la píldora aparece en `usuarios/index.php` o `perfil/index.php` (fondo `#fff`/`#f2f4f8`). Una segunda regla, con más especificidad (`.barra-superior .rol-admin-servidor`, etc.), la sobreescribe con fondo pastel translúcido + texto claro, pensada para el topbar oscuro (`.barra-superior`, fondo `#1a2a45`→`#0f1a2e`). **Si agregas un rol nuevo, define ambas variantes** — solo la de topbar hará que el texto sea ilegible en cualquier otro sitio donde se muestre el rol.
 
 **La píldora de rol con ícono/color no es exclusiva del topbar** — donde sea que se muestre el rol de un usuario (`usuarios/index.php` columna Rol, `perfil/index.php` dato Rol), usa el mismo patrón `ICONOS_ROL`/`CLASES_ROL`, nunca `<span class="rol-etiqueta"><?= e($rol) ?></span>` a secas.
 

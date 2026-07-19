@@ -2,8 +2,7 @@
 require_once __DIR__ . '/../../auth/sesion.php';
 require_once __DIR__ . '/../../config/conexion.php';
 
-// Según constantes.php, la telemetría la ve principalmente Admin_Telemetria (y podríamos permitir a Admin_Servidor)
-verificar_rol([ROL_ADMIN_TELEMETRIA, ROL_ADMIN_SERVIDOR]);
+verificar_rol([ROL_ADMIN_TELEMETRIA]);
 
 // Obtener los últimos 100 registros de telemetría
 $stmt = $pdo->query("
@@ -73,7 +72,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- El mapa es el elemento protagonista de este módulo -->
 <div id="mapa-telemetria" style="height: 520px; width: 100%; border-radius: 10px; margin-bottom: 8px; border: 1px solid #ccc; box-shadow: 0 1px 4px rgba(0,0,0,.06);"></div>
 <p style="font-size: 12px; color: #778; margin-bottom: 20px;">
-    Las ubicaciones GPS y la velocidad son insertadas automáticamente por el hardware de los camiones. <?= empty($registros) ? 'No hay datos reales aún — se muestran ubicaciones simuladas.' : '' ?>
+    Las ubicaciones GPS y la velocidad se envían automáticamente desde el teléfono del conductor mientras su turno está activo. <?= empty($registros) ? 'No hay datos reales aún — se muestran ubicaciones simuladas.' : '' ?>
 </p>
 
 <div class="panel">
