@@ -4,8 +4,11 @@ services:
     container_name: fleetcore_web
     ports:
       - "8080:80"
+      - "8443:443"
     volumes:
       - ./src:/var/www/html
+      - ./docker-ssl/dispatch.crt:/etc/apache2/ssl/dispatch.crt:ro
+      - ./docker-ssl/dispatch.key:/etc/apache2/ssl/dispatch.key:ro
     environment:
       DB_HOST: db
       DB_NAME: db_dispatch          # ← cambiado

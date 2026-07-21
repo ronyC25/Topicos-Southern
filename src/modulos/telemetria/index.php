@@ -16,7 +16,10 @@ $stmt = $pdo->query("
 ");
 $registros = $stmt->fetchAll();
 
-// Extraer la última ubicación conocida por camión para el mapa y los chips de estado
+// Extraer la última ubicación conocida por camión (para el mapa, los chips de
+// estado y el panel de "última ubicación por vehículo" — con varios conductores
+// activos a la vez, el historial crudo se llena de filas intercaladas y la
+// última posición de cada camión se pierde entre las de los demás).
 $ubicaciones_recientes = [];
 $vistos = [];
 foreach ($registros as $r) {
@@ -24,6 +27,9 @@ foreach ($registros as $r) {
         $ubicaciones_recientes[] = [
             'id_camion' => $r['id_camion'],
             'placa' => $r['placa'],
+            'conductor' => $r['conductor'],
+            'id_turno' => $r['id_turno'],
+            'fecha_registro' => $r['fecha_registro'],
             'latitud' => (float)$r['latitud'],
             'longitud' => (float)$r['longitud'],
             'velocidad_kmh' => (float)$r['velocidad_kmh']
@@ -35,9 +41,9 @@ foreach ($registros as $r) {
 // Datos falsos por si no hay registros reales, solo para demostrar el mapa
 if (empty($ubicaciones_recientes)) {
     $ubicaciones_recientes = [
-        ['id_camion' => 'CAM-001 (Simulado)', 'placa' => '---', 'latitud' => -17.2185, 'longitud' => -70.9254, 'velocidad_kmh' => 45],
-        ['id_camion' => 'CAM-002 (Simulado)', 'placa' => '---', 'latitud' => -17.2210, 'longitud' => -70.9310, 'velocidad_kmh' => 32],
-        ['id_camion' => 'CAM-003 (Simulado)', 'placa' => '---', 'latitud' => -17.2150, 'longitud' => -70.9200, 'velocidad_kmh' => 0]
+        ['id_camion' => 'CAM-001 (Simulado)', 'placa' => '---', 'conductor' => null, 'id_turno' => null, 'fecha_registro' => null, 'latitud' => -17.2185, 'longitud' => -70.9254, 'velocidad_kmh' => 45],
+        ['id_camion' => 'CAM-002 (Simulado)', 'placa' => '---', 'conductor' => null, 'id_turno' => null, 'fecha_registro' => null, 'latitud' => -17.2210, 'longitud' => -70.9310, 'velocidad_kmh' => 32],
+        ['id_camion' => 'CAM-003 (Simulado)', 'placa' => '---', 'conductor' => null, 'id_turno' => null, 'fecha_registro' => null, 'latitud' => -17.2150, 'longitud' => -70.9200, 'velocidad_kmh' => 0]
     ];
 }
 
@@ -75,9 +81,55 @@ require_once __DIR__ . '/../../includes/header.php';
     Las ubicaciones GPS y la velocidad se envían automáticamente desde el teléfono del conductor mientras su turno está activo. <?= empty($registros) ? 'No hay datos reales aún — se muestran ubicaciones simuladas.' : '' ?>
 </p>
 
+<div class="panel" style="margin-bottom:24px;">
+    <div class="panel-header">
+        <h2>Última ubicación por vehículo</h2>
+        <span class="contador"><?= count($ubicaciones_recientes) ?> vehículos</span>
+    </div>
+    <div class="panel-cuerpo">
+    <table class="tabla">
+    <thead>
+        <tr>
+            <th>Camión</th>
+            <th>Conductor (Turno)</th>
+            <th>Última actualización</th>
+            <th>Coordenadas GPS</th>
+            <th>Velocidad</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (empty($registros)): ?>
+            <tr><td colspan="5">No hay datos de telemetría disponibles (mostrando ubicaciones simuladas en el mapa).</td></tr>
+        <?php else: foreach ($ubicaciones_recientes as $u): ?>
+            <tr>
+                <td data-label="Camión">
+                    <strong><?= e($u['id_camion']) ?></strong><br>
+                    <small style="color:#667;"><?= e($u['placa']) ?></small>
+                </td>
+                <td data-label="Conductor">
+                    <?= e($u['conductor'] ?: 'Desconocido') ?><br>
+                    <small style="color:#667;">Turno #<?= e($u['id_turno']) ?></small>
+                </td>
+                <td data-label="Última actualización"><?= e($u['fecha_registro']) ?></td>
+                <td data-label="GPS">
+                    <a href="https://maps.google.com/?q=<?= $u['latitud'] ?>,<?= $u['longitud'] ?>" target="_blank" style="color: #2c4a7c; text-decoration: none;">
+                        <?= $u['latitud'] ?>, <?= $u['longitud'] ?> 📍
+                    </a>
+                </td>
+                <td data-label="Velocidad">
+                    <?php $color = $u['velocidad_kmh'] > 40 ? 'color: #a33; font-weight: bold;' : 'color: #1c7a3d;'; ?>
+                    <span style="<?= $color ?>"><?= number_format($u['velocidad_kmh'], 1) ?> km/h</span>
+                </td>
+            </tr>
+        <?php endforeach; endif; ?>
+    </tbody>
+    </table>
+    </div>
+</div>
+
 <div class="panel">
     <div class="panel-header">
-        <h2>Historial de telemetría</h2>
+        <h2>Historial completo (log crudo)</h2>
         <span class="contador"><?= count($registros) ?> registros</span>
     </div>
     <div class="panel-cuerpo">

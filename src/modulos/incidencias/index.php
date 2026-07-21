@@ -11,7 +11,7 @@ $params = [];
 // Conductores solo ven incidencias de sus turnos
 if ($es_conductor) {
     $filtro_sql = "WHERE t.dni_conductor = ?";
-    $params[] = $_SESSION['nombre_usuario'];
+    $params[] = $_SESSION['dni'] ?? '';
 }
 
 $sql = "
@@ -134,7 +134,7 @@ require_once __DIR__ . '/../../includes/header.php';
                         $params_turnos = [];
                         if ($es_conductor) {
                             $sql_turnos .= " AND t.dni_conductor = ?";
-                            $params_turnos[] = $_SESSION['nombre_usuario'];
+                            $params_turnos[] = $_SESSION['dni'] ?? '';
                         }
                         $stmt = $pdo->prepare($sql_turnos);
                         $stmt->execute($params_turnos);

@@ -31,10 +31,13 @@ require_once __DIR__ . '/../../includes/header.php';
 <div class="panel">
     <div class="panel-header">
         <h2>Usuarios registrados</h2>
-        <span class="contador"><?= count($usuarios) ?> usuarios</span>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <input type="search" placeholder="Buscar..." data-buscar-tabla="#tablaUsuarios" style="padding: 5px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 12px;">
+            <span class="contador"><?= count($usuarios) ?> usuarios</span>
+        </div>
     </div>
     <div class="panel-cuerpo">
-    <table class="tabla">
+    <table class="tabla" id="tablaUsuarios">
     <thead>
         <tr>
             <th>Usuario (Login)</th>

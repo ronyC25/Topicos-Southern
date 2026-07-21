@@ -146,6 +146,10 @@ fleetcore/
    del conductor — ver "HTTPS para telemetría móvil" más abajo)
 7. Acceso para todos: `http://192.168.10.10:8080/fleetcore`
    Acceso para Conductor (telemetría): `https://192.168.10.10:8443/fleetcore`
+8. Avisar a los conductores que, durante el turno, deben dejar el navegador
+   abierto en la página de Turnos y la pantalla del celular encendida — ver
+   "Telemetría móvil — la pantalla tiene que quedar encendida" más abajo,
+   es un requisito real de cómo funciona el envío de GPS, no un detalle menor.
 
 ---
 
@@ -223,3 +227,68 @@ Con HTTPS ya disponible, en algún momento conviene apagar el acceso HTTP puro
 (8080) o dejar de usarlo para el login — hoy las contraseñas viajan sin cifrar
 por la red de la mina. No se hizo como parte de este cambio porque no fue lo
 pedido; es una mejora de seguridad natural una vez esto esté funcionando.
+
+## Telemetría móvil — la pantalla tiene que quedar encendida
+
+El envío de ubicación (`turnos/index.php` + `turnos/registrar_ubicacion.php`,
+`navigator.geolocation.watchPosition()`) es JavaScript corriendo en la pestaña
+del navegador del celular mientras el turno está `Activo`. Esto **solo
+funciona con la página abierta y en primer plano**:
+
+- Si el conductor cambia a otra app, bloquea la pantalla, o cierra el
+  navegador, Android/iOS pausan la ejecución de JS en segundo plano — el
+  envío de GPS se corta hasta que la página vuelve a primer plano.
+- No es un bug puntual ni algo que se arregle con un ajuste chico de código:
+  una página web (a diferencia de una app nativa) no tiene forma confiable de
+  seguir mandando ubicación con la pantalla apagada. Arreglarlo de verdad
+  requeriría una app nativa (Android/iOS) — está fuera del alcance actual del
+  proyecto (PHP plano, sin build step, sin apps nativas).
+- **Indicación operativa para los conductores:** dejar el celular con la
+  página de Turnos abierta y la pantalla encendida durante todo el turno.
+  Si hace falta evitar que la pantalla se apague sola por inactividad, se
+  puede evaluar agregar la [Screen Wake Lock
+  API](https://developer.mozilla.org/docs/Web/API/Screen_Wake_Lock_API) al
+  frontend — no resuelve el caso de cambiar de app, pero sí el de que el
+  celular apague la pantalla solo. No implementado todavía, mencionado al
+  usuario y quedó pendiente a pedido explícito (se priorizó documentar la
+  limitación antes que resolverla).
+
+### HTTPS para telemetría móvil — probarlo en local antes de desplegar
+
+Docker corre en `http://localhost:8080`, y `localhost` está exento del
+requisito de "contexto seguro" de `navigator.geolocation` — por eso el
+bloqueo de geolocalización que sí ocurre en el servidor real (HTTP plano
+sobre una IP) **no se reproduce solo con `docker compose up`**. Para
+probarlo de verdad antes de desplegar, el repo ya trae el soporte HTTPS
+armado (mismo patrón que arriba, sobre Docker):
+
+1. Generar el certificado con tu propia IP de LAN (`ipconfig`, adaptador
+   Wi-Fi) — **no** commitear esto, `docker-ssl/` está en `.gitignore`
+   porque el certificado es específico de la IP de quien lo genera:
+   ```cmd
+   openssl req -x509 -nodes -newkey rsa:2048 -keyout docker-ssl/dispatch.key -out docker-ssl/dispatch.crt -days 3650 -subj "/CN=TU_IP_LAN" -addext "subjectAltName=IP:TU_IP_LAN"
+   ```
+2. `docker compose up -d --build` — el `Dockerfile` ya habilita `mod_ssl`
+   y `docker/ssl.conf` (sí versionado, sin datos sensibles) sirve HTTPS en
+   el puerto 443 del contenedor, mapeado a `8443` en `docker-compose.yml`.
+3. Windows bloquea por defecto las conexiones entrantes al puerto de Docker
+   desde otros dispositivos de la red — no existe ninguna regla para
+   Docker/8080/8443 de fábrica. Agregar una regla de firewall (una sola vez,
+   PowerShell **como administrador**, acotada al perfil de red Privado):
+   ```powershell
+   New-NetFirewallRule -DisplayName "FleetCore Docker HTTPS (8443, prueba local)" -Direction Inbound -Protocol TCP -LocalPort 8443 -Action Allow -Profile Private
+   ```
+4. Desde el celular, en la misma Wi-Fi: `https://TU_IP_LAN:8443/`, aceptar
+   la advertencia de certificado autofirmado, loguear como un Conductor con
+   turno `Activo` (el `dni` de `usuarios` debe coincidir con el `dni` de
+   `conductores` — si no, nunca va a ver su turno, es el mismo problema que
+   tiene `conductor.prueba` con `dni = NULL`, ver más abajo).
+
+**Si el navegador nunca pide permiso de ubicación ni en local ni en el
+servidor real, no asumas que es un bug de código** — primero revisar en el
+celular: Ubicación del sistema operativo activada, permiso de Chrome/Safari
+a nivel de app, y la configuración de sitios del navegador
+(`chrome://settings/content/location` en Android o el equivalente en iOS)
+por si el sitio quedó bloqueado de una prueba anterior. El flujo de servidor
+(`turnos/registrar_ubicacion.php` + el JS de `turnos/index.php`) ya está
+verificado end-to-end — la causa más común es ambiental, no de código.
